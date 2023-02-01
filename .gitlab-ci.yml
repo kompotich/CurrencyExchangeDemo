@@ -1,0 +1,38 @@
+.configuration-template:
+  image: mcr.microsoft.com/dotnet/nightly/sdk:7.0
+  tags: 
+    - docker
+
+build-exchangedata:
+  stage: build
+  extends: .configuration-template
+  script:
+    - dotnet build ExchangeData --configuration Release
+    - dotnet pack ExchangeData/CurrencyExchange.ExchangeData.csproj -c Release -o packages
+    
+build-crawler:
+  stage: build
+  extends: .configuration-template
+  script:
+    - dotnet restore Crawler -s packages -s "https://api.nuget.org/v3/index.json"
+    - dotnet build Crawler --no-restore
+    
+build-converter:
+  stage: build
+  extends: .configuration-template
+  script:
+    - dotnet restore Converter -s packages -s "https://api.nuget.org/v3/index.json"
+    - dotnet build Converter --no-restore
+    
+build-storage:
+  stage: build
+  extends: .configuration-template
+  script:
+    - dotnet restore Storage -s packages -s "https://api.nuget.org/v3/index.json"
+    - dotnet build Storage --no-restore
+
+test-storage:
+  stage: test
+  extends: .configuration-template
+  script:
+    - dotnet test Storage --no-restore

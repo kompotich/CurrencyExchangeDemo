@@ -1,0 +1,42 @@
+version: '3.4'
+
+services:
+  crawler:
+    image: ${DOCKER_REGISTRY-}crawler
+    build:
+      context: .
+      dockerfile: Crawler/Crawler.Main/Dockerfile
+
+  converter:
+    image: ${DOCKER_REGISTRY-}converter
+    build:
+      context: .
+      dockerfile: Converter/Converter.Main/Dockerfile
+
+  storage:
+    image: ${DOCKER_REGISTRY-}storage
+    build:
+      context: .
+      dockerfile: Storage/Storage.Main/Dockerfile
+
+  rabbitmq:
+    image: rabbitmq:3.10.6-management-alpine
+    hostname: rabbitmq
+    ports:
+      - 5672:5672
+      - 15672:15672
+
+  postgres:
+    image: postgres:14.1-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - '5432:5432'
+    volumes: 
+      - postgres:/var/lib/postgresql/data
+      
+volumes:
+  postgres:
+    driver: local
